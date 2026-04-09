@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Meal Planner</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <header>
+        <div class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-bowl-food"></i></span>
+          <h1>Family <span>Meal Planner</span></h1>
+        </div>
+        <div class="header-controls">
+          <div v-if="user" class="user-greeting">
+            Hi, {{ user.firstName }}
+            <button @click="logout" class="btn-logout">Logout</button>
+          </div>
+          <div v-else class="auth-buttons">
+            <button @click="openAuth('login')" class="btn-login">Login</button>
+            <button @click="openAuth('signup')" class="btn-signup">
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <section class="planner-section">
+          <div class="planner-header">
+            <div>
+              <h2>Weekly Meal Plan</h2>
+              <p class="subtitle">
+                <span class="desktop-text"
+                  >Drag and drop recipes to add meals!</span
+                >
+                <span class="mobile-text"
+                  >Tap a recipe to add it to your plan!</span
+                >
+              </p>
+            </div>
+            <div
+              class="planner-actions"
+              style="display: flex; gap: 10px; flex-wrap: wrap"
+            >
+              <button @click="savePlan()" class="btn-secondary">
+                <i class="fa-solid fa-floppy-disk"></i> Save Plan
+              </button>
+              <button
+                @click="user ? (showGroceryModal = true) : openAuth('login')"
+                class="btn-grocery-peach"
+              >
+                <i class="fa-solid fa-cart-shopping"></i> Generate Grocery List
+              </button>
+              <button v-if="user" @click="clearPlan()" class="btn-clear">
+                <i class="fa-solid fa-trash-can"></i> Clear Plan
+              </button>
+            </div>
+          </div>
+
+          <div class="week-grid">
+            <div v-for="day in days" :key="day" class="day-card">
+              <div class="day-header">{{ day }}</div>
+              <div class="day-body">
+                <div
+                  class="meal-slot"
+                  @dragover.prevent
+                  @drop="dropRecipe(day, 'Lunch')"
+                >
+                  <span class="slot-label">Lunch</span>
+
+                  <div
+                    v-if="mealPlan[day] && mealPlan[day].Lunch"
+                    class="filled-meal"
+                    @click="viewRecipe(mealPlan[day].Lunch)"
+                  >
+                    <img :src="mealPlan[day].Lunch.imageURL" alt="Food" />
+                    <div class="filled-info">
+                      <h5>{{ mealPlan[day].Lunch.title }}</h5>
+                      <span class="time"
+                        ><i class="fa-regular fa-clock"></i> {{
+                        mealPlan[day].Lunch.time || 25 }} mins</span
+                      >
+                    </div>
+                    <button
+                      @click.stop="removeMeal(day, 'Lunch')"
+                      class="remove-btn"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div
+                    v-else
+                    class="empty-slot"
+                    @click="openMobileSelection(day, 'Lunch')"
+                  >
+                    <span class="desktop-text">Drag to Add</span>
+                    <span class="mobile-text">Tap to Add</span>
+                  </div>
+                </div>
+
+                <div
+                  class="meal-slot"
+                  @dragover.prevent
+                  @drop="dropRecipe(day, 'Dinner')"
+                >
+                  <span class="slot-label">Dinner</span>
+
+                  <div
+                    v-if="mealPlan[day] && mealPlan[day].Dinner"
+                    class="filled-meal"
+                    @click="viewRecipe(mealPlan[day].Dinner)"
+                  >
+                    <img :src="mealPlan[day].Dinner.imageURL" alt="Food" />
+                    <div class="filled-info">
+                      <h5>{{ mealPlan[day].Dinner.title }}</h5>
+                      <span class="time"
+                        ><i class="fa-regular fa-clock"></i> {{
+                        mealPlan[day].Dinner.time || 35 }} mins</span
+                      >
+                    </div>
+                    <button
+                      @click.stop="removeMeal(day, 'Dinner')"
+                      class="remove-btn"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div
+                    v-else
+                    class="empty-slot"
+                    @click="openMobileSelection(day, 'Dinner')"
+                  >
+                    <span class="desktop-text">Drag to Add</span>
+                    <span class="mobile-text">Tap to Add</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="library-section"
+          :class="{ 'mobile-modal-active': showMobileLibrary }"
+        >
+          <div class="library-header" style="position: relative">
+            <button
+              v-if="showMobileLibrary"
+              class="close-btn-mobile-x"
+              @click="showMobileLibrary = false"
+            >
+              ×
+            </button>
+
+            <h2>Recipe Library</h2>
+
+            <p
+              v-if="showMobileLibrary && activeMobileSlot"
+              style="
+                margin: 10px 0;
+                font-weight: bold;
+                color: #90b090;
+                font-size: 1.1rem;
+              "
+            >
+              Tap a recipe to add to {{ activeMobileSlot.day }} {{
+              activeMobileSlot.time }}
+            </p>
+
+            <div class="search-bar">
+              <input
+                v-model="searchQuery"
+                @keyup.enter="searchApi"
+                placeholder="Search recipes..."
+              />
+            </div>
+            <div class="filter-tags">
+              <button
+                class="filter-btn"
+                :class="{ active: activeFilter === 'Vegetarian' }"
+                @click="toggleFilter('Vegetarian')"
+              >
+                Vegetarian
+              </button>
+              <button
+                class="filter-btn"
+                :class="{ active: activeFilter === 'Gluten-Free' }"
+                @click="toggleFilter('Gluten-Free')"
+              >
+                Gluten-Free
+              </button>
+              <button
+                class="filter-btn"
+                :class="{ active: activeFilter === 'Quick' }"
+                @click="toggleFilter('Quick')"
+              >
+                Quick
+              </button>
+            </div>
+          </div>
+
+          <div class="recipe-list">
+            <div
+              v-for="recipe in displayedRecipes"
+              :key="recipe._id"
+              class="recipe-card"
+              draggable="true"
+              @dragstart="startDrag(recipe)"
+              @click="showMobileLibrary ? addRecipeToMobileSlot(recipe) : viewRecipe(recipe)"
+            >
+              <img :src="recipe.imageURL" alt="Recipe Image" />
+              <div class="recipe-info">
+                <h4>{{ recipe.title }}</h4>
+                <span class="time"
+                  ><i class="fa-regular fa-clock"></i> {{ recipe.time }}
+                  mins</span
+                >
+                <div class="tags">
+                  <span v-for="tag in recipe.tags" :key="tag" class="tag"
+                    >{{ tag }}</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <button
+          class="mobile-floating-btn"
+          @click="openMobileSelection(null, null)"
+        >
+          <i class="fa-solid fa-book-open"></i> Browse Recipes
+        </button>
+      </main>
+
+      <div
+        v-if="selectedRecipe"
+        class="modal-backdrop"
+        @click.self="selectedRecipe = null"
+      >
+        <div class="modal recipe-modal" style="position: relative">
+          <button class="close-btn" @click="selectedRecipe = null">×</button>
+          <img :src="selectedRecipe.imageURL" class="modal-header-img" />
+          <div class="modal-body">
+            <h2>{{ selectedRecipe.title }}</h2>
+            <div class="modal-meta">
+              <span class="time"
+                ><i class="fa-regular fa-clock"></i> {{ selectedRecipe.time ||
+                30 }} minutes</span
+              >
+              <span v-for="tag in selectedRecipe.tags" :key="tag" class="tag"
+                >{{ tag }}</span
+              >
+            </div>
+            <div class="details-content">
+              <h4>Ingredients</h4>
+              <ul class="ingredients-list">
+                <li v-for="ing in selectedRecipe.ingredients" :key="ing">
+                  <strong>•</strong> {{ ing }}
+                </li>
+              </ul>
+              <h4>Instructions</h4>
+              <ol class="instruction-steps">
+                <li
+                  v-for="(step, index) in selectedRecipe.instructions"
+                  :key="index"
+                >
+                  {{ step }}
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="showAuthModal"
+        class="modal-backdrop"
+        @click.self="showAuthModal = false"
+      >
+        <div class="modal auth-modal" style="position: relative">
+          <button class="close-btn" @click="showAuthModal = false">×</button>
+          <h2
+            style="margin-bottom: 25px; font-weight: 800; padding-right: 20px"
+          >
+            {{ isLogin ? 'Login' : 'Create Account' }}
+          </h2>
+          <div class="auth-form">
+            <div v-if="!isLogin" style="display: flex; gap: 10px">
+              <input
+                v-model="authForm.firstName"
+                placeholder="First Name"
+                class="auth-input"
+              />
+              <input
+                v-model="authForm.lastName"
+                placeholder="Last Name"
+                class="auth-input"
+              />
+            </div>
+            <input
+              v-if="!isLogin"
+              v-model="authForm.email"
+              type="email"
+              placeholder="Email Address"
+              class="auth-input"
+            />
+            <input
+              v-model="authForm.username"
+              placeholder="Username"
+              class="auth-input"
+            />
+            <input
+              v-model="authForm.password"
+              type="password"
+              placeholder="Password"
+              class="auth-input"
+            />
+            <button
+              @click="isLogin ? login() : signup()"
+              class="btn-auth-submit"
+            >
+              {{ isLogin ? 'Login' : 'Sign Up' }}
+            </button>
+          </div>
+          <p style="margin-top: 20px; color: #666">
+            {{ isLogin ? "Don't have an account?" : "Already have an account?"
+            }}
+            <span class="auth-link-highlight" @click="isLogin = !isLogin"
+              >{{ isLogin ? 'Sign up' : 'Login' }}</span
+            >
+          </p>
+        </div>
+      </div>
+
+      <div v-if="showGroceryModal" class="modal-backdrop">
+        <div class="modal grocery-modal" style="position: relative">
+          <div class="modal-header">
+            <div class="title-group">
+              <span class="cart-emoji"
+                ><i class="fa-solid fa-basket-shopping"></i
+              ></span>
+              <h2>Your Shopping List</h2>
+            </div>
+            <button class="close-btn" @click="showGroceryModal = false">
+              ×
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="grocery-list">
+              <li
+                v-for="item in computedGroceryList"
+                :key="item"
+                class="grocery-item"
+              >
+                <input type="checkbox" :id="item" />
+                <label :for="item">{{ item }}</label>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-print" onclick="window.print()">
+              <i class="fa-solid fa-print"></i> Print List
+            </button>
+            <button class="btn-close-modal" @click="showGroceryModal = false">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="toast.show" :class="['toast', toast.type]">
+        {{ toast.message }}
+      </div>
+      <button class="btn-ai-floating" @click="toggleAiChat">
+        <i class="fa-solid fa-sparkles"></i> Ask AI
+      </button>
+
+      <div class="ai-chat-overlay" v-if="showAiChat" @click.self="toggleAiChat">
+        <div class="ai-chat-box">
+          <div class="ai-chat-header">
+            <div class="ai-header-info">
+              <h3>👨‍🍳 Chef AI</h3>
+              <p>Tell me what you're craving!</p>
+            </div>
+            <button class="close-ai" @click="toggleAiChat">✖</button>
+          </div>
+
+          <div class="ai-chat-messages" ref="chatContainer">
+            <div class="chat-bubble ai-message">
+              Hi there! What are we in the mood for today? I can help you come
+              up with a recipe based on what's in your fridge.
+            </div>
+
+            <div
+              v-for="(msg, index) in chatHistory"
+              :key="index"
+              :class="['chat-bubble', msg.sender === 'user' ? 'user-message' : 'ai-message']"
+              v-html="msg.text"
+            ></div>
+
+            <div v-if="isAiTyping" class="chat-bubble ai-message typing">
+              Chef AI is typing...
+            </div>
+          </div>
+
+          <div class="ai-chat-input">
+            <input
+              type="text"
+              v-model="chatInput"
+              @keyup.enter="sendChatMessage"
+              placeholder="E.g., I want a quick spicy chicken dish..."
+            />
+            <button
+              @click="sendChatMessage"
+              :disabled="!chatInput.trim() || isAiTyping"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
