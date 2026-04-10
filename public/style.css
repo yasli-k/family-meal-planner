@@ -310,7 +310,6 @@ header {
   justify-content: center;
   align-items: center;
   color: #999;
-  font-weight: bold;
   background: #f9f9f9;
   transition: background 0.2s;
 }
@@ -721,6 +720,9 @@ header {
     height: 600px;
     margin-top: 20px;
   }
+  .logo h1 span {
+    font-size: 1rem;
+  }
 }
 /* --- DESKTOP FIXES --- */
 
@@ -783,6 +785,9 @@ header {
     font-size: 1.2rem;
     margin: 0;
   }
+  .logo h1 span {
+    font-size: 1.2rem;
+  }
   .logo-icon {
     font-size: 1.5rem;
   }
@@ -800,7 +805,6 @@ header {
     font-size: 0.9rem;
   }
 
-  /* 2. BODY ALIGNMENT: Make content padding match header perfectly */
   .main-content {
     padding: 10px 15px !important;
     width: 100%;
