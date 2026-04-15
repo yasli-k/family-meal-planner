@@ -55,7 +55,7 @@ header {
 }
 .logo h1 span {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin: 0;
   color: #333;
   font-weight: 800;
@@ -786,7 +786,7 @@ header {
     margin: 0;
   }
   .logo h1 span {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
   .logo-icon {
     font-size: 1.5rem;
@@ -1087,4 +1087,79 @@ header {
 .ai-chat-input button:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+/* =========================================
+   MOBILE POLISH FIXES
+   ========================================= */
+
+/* 1. Header & Logo Fixes for Mobile */
+@media (max-width: 768px) {
+  header {
+    padding: 12px 15px;
+    gap: 10px;
+  }
+  .logo {
+    gap: 6px;
+  }
+  .logo-icon {
+    font-size: 1.3rem !important;
+  }
+  .logo h1 {
+    font-size: 1.1rem !important; /* Shrinks the huge title */
+  }
+  .auth-buttons {
+    gap: 8px;
+    display: flex;
+    align-items: center;
+  }
+  .btn-login,
+  .btn-signup {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important; /* Fits buttons better on small screens */
+  }
+}
+
+/* 2. Chef AI Text & Bullet Point Fixes */
+.chat-bubble {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+/* This forces the bullet points to indent properly instead of hugging the wall */
+.chat-bubble ul,
+.chat-bubble ol {
+  padding-left: 24px !important;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.chat-bubble li {
+  margin-bottom: 4px;
+}
+@media (max-width: 768px) {
+  .chat-bubble {
+    font-size: 0.9rem !important; /* Stops text from being massive on phones */
+  }
+}
+
+/* 3. Browse Recipes Mobile Modal Size Fix */
+@media (max-width: 768px) {
+  .library-section.mobile-modal-active {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; /* Centers it perfectly */
+    width: 90% !important;
+    height: 70vh !important; /* Shrinks it to match the AI box */
+    max-height: 600px;
+    bottom: auto !important; /* Removes the old bottom alignment */
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+  }
+  /* Ensures the recipes scroll nicely inside the new smaller box */
+  .library-section.mobile-modal-active .recipe-list {
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
 }
