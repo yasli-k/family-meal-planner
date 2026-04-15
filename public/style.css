@@ -782,11 +782,11 @@ header {
   }
 
   .logo h1 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin: 0;
   }
   .logo h1 span {
-    font-size: 1rem;
+    font-size: 1.3rem;
   }
   .logo-icon {
     font-size: 1.5rem;
@@ -1103,10 +1103,10 @@ header {
     gap: 6px;
   }
   .logo-icon {
-    font-size: 1.3rem !important;
+    font-size: 1.5rem !important;
   }
   .logo h1 {
-    font-size: 1.1rem !important; /* Shrinks the huge title */
+    font-size: 1.6rem !important; /* Shrinks the huge title */
   }
   .auth-buttons {
     gap: 8px;
