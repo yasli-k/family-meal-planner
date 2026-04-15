@@ -1148,8 +1148,8 @@ header {
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important; /* Centers it perfectly */
-    width: 90% !important;
-    height: 70vh !important; /* Shrinks it to match the AI box */
+    width: 100% !important;
+    height: 80vh !important; /* Shrinks it to match the AI box */
     max-height: 600px;
     bottom: auto !important; /* Removes the old bottom alignment */
     border-radius: 16px !important;
