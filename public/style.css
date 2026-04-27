@@ -791,6 +791,9 @@ header {
   .logo-icon {
     font-size: 1.5rem;
   }
+  .planner-header h2 {
+    font-size: 1.5rem;
+  }
   .header-controls {
     width: auto;
   }
