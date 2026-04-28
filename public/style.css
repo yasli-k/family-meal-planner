@@ -1132,3 +1132,82 @@ header {
 .chat-bubble li {
   margin-bottom: 4px;
 }
+
+/* =========================================
+   MODAL FOOTER BUTTONS
+   ========================================= */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end; /* Pushes buttons to the right */
+  gap: 12px; /* Space between buttons */
+  padding-top: 15px;
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.btn-print,
+.btn-close-modal {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s ease;
+}
+
+.btn-print {
+  background-color: #f4a261; /* Matches your peach theme */
+  color: white;
+}
+
+.btn-close-modal {
+  background-color: #e2e8f0; /* Soft gray */
+  color: #333;
+}
+
+.btn-print:hover,
+.btn-close-modal:hover {
+  opacity: 0.8;
+}
+
+/* =========================================
+   print and groceries
+   ========================================= */
+@media print {
+  header,
+  .main-content,
+  .btn-ai-floating {
+    display: none !important;
+  }
+
+  body,
+  .modal-backdrop {
+    background: white !important;
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .modal.grocery-modal {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+    padding: 0 !important;
+  }
+
+  .modal-body {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .modal-footer,
+  .close-btn {
+    display: none !important;
+  }
+}
