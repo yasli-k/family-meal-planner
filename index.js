@@ -23,10 +23,9 @@ app.use(
 
 // --- PUBLIC ROUTES (No Login Required) ---
 
-// 1. The Online Recipe Route
+// the Online Recipe Route
 app.get("/api/online-recipes", async (req, res) => {
   try {
-    // 1. Pick a random category if the user hasn't searched for anything
     const defaultTerms = [
       "chicken",
       "salad",
@@ -43,7 +42,6 @@ app.get("/api/online-recipes", async (req, res) => {
     const randomTerm =
       defaultTerms[Math.floor(Math.random() * defaultTerms.length)];
 
-    // Use the user's search, or the random term if they just loaded the page
     const query = req.query.s || randomTerm;
 
     const response = await axios.get(
@@ -55,7 +53,6 @@ app.get("/api/online-recipes", async (req, res) => {
     }
 
     const formatted = response.data.meals.map((m) => {
-      // 2. Chop the giant block of text into separate steps based on line-breaks
       const rawText = m.strInstructions || "";
       const stepArray = rawText
         .split(/\r\n|\n/)
@@ -74,7 +71,7 @@ app.get("/api/online-recipes", async (req, res) => {
           m.strIngredient6,
         ].filter((i) => i && i.trim() !== ""),
         prepTime: 30,
-        instructions: stepArray, // We now send an Array of steps instead of a giant string
+        instructions: stepArray,
       };
     });
 
@@ -85,16 +82,15 @@ app.get("/api/online-recipes", async (req, res) => {
   }
 });
 
-// --- NEW AI ROUTE (OPENROUTER / MINIMAX) ---
+// --- AI ROUTE (OPENROUTER / MINIMAX) ---
 app.post("/api/ask-ai", async (req, res) => {
   try {
     const userPrompt = req.body.prompt;
 
-    // Use Axios to send a POST request to OpenRouter
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "minimax/minimax-m2.5", // This tells OpenRouter to use Minimax
+        model: "minimax/minimax-m2.5",
         messages: [
           {
             role: "system",
@@ -111,19 +107,16 @@ app.post("/api/ask-ai", async (req, res) => {
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "HTTP-Referer": "http://localhost:8080", // OpenRouter requires this to identify your app
-          "X-Title": "Family Meal Planner", // Optional, shows up in your OpenRouter dashboard
+          "HTTP-Referer": "http://localhost:8080",
+          "X-Title": "Family Meal Planner",
         },
       },
     );
 
-    // Dig into the JSON to pull out just the AI's text
     const aiResponseText = response.data.choices[0].message.content;
 
-    // Send the response back to your Vue frontend
     res.json({ reply: aiResponseText });
   } catch (error) {
-    // This logs the exact reason OpenRouter failed if something goes wrong
     console.error(
       "OpenRouter Error:",
       error.response ? error.response.data : error.message,

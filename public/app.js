@@ -11,7 +11,7 @@ createApp({
       searchQuery: "",
       recipes: [],
       draggedRecipe: null,
-      selectedRecipe: null, //Tracks which recipe is clicked
+      selectedRecipe: null,
       mealPlan: {},
       days: [
         "Monday",
@@ -106,10 +106,9 @@ createApp({
         "Keto-Friendly",
       ];
       return recipeList.map((r) => {
-        // Pick 1 or 2 random tags
         const shuffled = possibleTags.sort(() => 0.5 - Math.random());
         r.tags = shuffled.slice(0, Math.floor(Math.random() * 2) + 1);
-        r.time = Math.floor(Math.random() * 4) * 10 + 20; // 20, 30, 40, or 50 mins
+        r.time = Math.floor(Math.random() * 4) * 10 + 20;
         return r;
       });
     },
@@ -138,7 +137,6 @@ createApp({
       this.showAuthModal = true;
     },
     async signup() {
-      // 1. Check if ANY field is missing
       if (
         !this.authForm.firstName ||
         !this.authForm.lastName ||
@@ -150,25 +148,22 @@ createApp({
           "Please fill out all fields, including your last name.",
           "error",
         );
-        return; // Stops the function from sending bad data to the server
+        return;
       }
 
-      // 2. Simple check for a valid email format
       if (
         !this.authForm.email.includes("@") ||
         !this.authForm.email.includes(".")
       ) {
         this.showToast("Please enter a valid email address.", "error");
-        return; // Stops the function
+        return;
       }
 
-      // 3. If data is good, send it to the backend
       try {
         const res = await axios.post("/signup", this.authForm);
         this.user = res.data.user;
         this.showAuthModal = false;
 
-        // Clear the form for the next time
         this.authForm = {
           firstName: "",
           lastName: "",
@@ -180,7 +175,6 @@ createApp({
         this.showToast("Account created successfully!");
         this.savePlan();
       } catch (e) {
-        // If the server still rejects it (e.g., username already exists), catch it here
         console.error("Signup error:", e.response?.data || e);
         this.showToast(
           "Signup failed. That username or email might already be taken.",
@@ -226,12 +220,11 @@ createApp({
         this.showToast("Failed to save plan.", "error");
       }
     },
-    // --- NEW CLEAR PLAN FEATURE ---
     async clearPlan() {
       if (!confirm("Are you sure you want to clear your entire week?")) return;
       this.mealPlan = {};
       this.showToast("Meal plan cleared!");
-      if (this.user) this.savePlan(); // Auto-save the empty board if logged in
+      if (this.user) this.savePlan();
     },
     printList() {
       window.print();
@@ -288,7 +281,6 @@ createApp({
 
       const userText = this.chatInput;
 
-      // FIX 1: We just push the plain userText here.
       this.chatHistory.push({
         sender: "user",
         text: userText,
@@ -308,7 +300,6 @@ createApp({
 
         this.isAiTyping = false;
 
-        // FIX 2: We use marked.parse on the AI's response down here!
         this.chatHistory.push({
           sender: "ai",
           text: marked.parse(res.data.reply),
@@ -321,7 +312,6 @@ createApp({
         });
       }
 
-      // Auto-scroll to bottom again
       this.$nextTick(() => {
         const container = this.$refs.chatContainer;
         if (container) container.scrollTop = container.scrollHeight;

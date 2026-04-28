@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const { Schema } = mongoose;
 
 require("dotenv").config({
-  quiet: true, //this turns off the injection tips
+  quiet: true,
 });
 
 mongoose
