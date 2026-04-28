@@ -108,7 +108,7 @@ app.post("/api/ask-ai", async (req, res) => {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "HTTP-Referer": "http://localhost:8080",
-          "X-Title": "Family Meal Planner",
+          "X-Title": "Family Prep",
         },
       },
     );
